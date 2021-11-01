@@ -68,7 +68,7 @@ def main():
     # data_list = os.listdir(file_path)
     # for i in data_list:
 
-    file_path = os.path.join(os.getcwd(), './01000002.txt')
+    file_path = os.path.join(os.getcwd(), './data/01000002.txt')
     total_data = pd.read_csv(file_path, sep='\t')
 
     minmax_scaler = MinMaxScaler(feature_range=(-1, 1))
