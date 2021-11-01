@@ -11,6 +11,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
+from model import Transformer_encoder
+
 def train_one_epoch(model, data_loader, criterion, optimizer, device):
     model.train()
     criterion.train()
