@@ -8,7 +8,7 @@
 
 ## 2. 결과
     
-    - 사용한 Data file은 01000002.txt이며, 진행된 결과는 아래와 같다 (추가 예정). 
+    - 사용한 Data file은 01000002.txt이며, 진행된 결과는 figure_save에 저장된 이미지와 같다 (추가 예정). [e: epoch, p: n_past, b: batch_size]
     
 ## 3. More..
 
