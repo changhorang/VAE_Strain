@@ -13,6 +13,28 @@ from torch.utils.data import Dataset, DataLoader
 
 from model import Transformer_encoder
 
+batch_size = 200
+n_past = 30
+n_future = 1
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f'Initializing Device: {device}')
+
+class CustomDataset(Dataset):
+    def __init__(self, df, n_past, n_future):
+        self.X = []     # n_past 만큼의 feature 데이터
+        self.y = []     # n_future 만큼의 label 데이터
+        x_col = (df.shape[1]) - 1   # df 에서 -1번째 columns 까지 x
+        
+        for i in range(n_past, len(df)):
+            self.X.append(df[i - n_past:i, 4:x_col])
+            self.y.append(df[i + n_future - 1: i + n_future, x_col])
+
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, idx):
+        return self.X[idx], self.y[idx]
+
 def train_one_epoch(model, data_loader, criterion, optimizer, device):
     model.train()
     criterion.train()
