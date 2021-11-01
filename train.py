@@ -133,7 +133,7 @@ def main():
     data_path = os.path.join(os.getcwd(), "figure_save")
     if not os.path.exists(data_path):
         os.mkdir(data_path)
-    plt.savefig(f"{data_path}/figure_{int(epoch)+1}_{n_past}_{batch_size}.png")
+    plt.savefig(f"{data_path}/figure_e{int(epoch)+1}_p{n_past}_b{batch_size}.png")
     # print(output_list)
 
 
