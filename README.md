@@ -11,6 +11,8 @@
     - 전체적인 경향성은 각 parameter별로 따라가는 것으로 확인은 되었지만, 예측된 값은 아직 큰 차이가 있는 것으로 확인
 
     - 사용한 Data file은 01000002.txt이며, 진행된 결과는 figure_save에 저장된 이미지와 같다 (추가 예정). [e: epoch, p: n_past, b: batch_size]
+
+![figure_e100_p20_b200.png](./figure_save/figure_e100_p20_b200.png)
     
 ## 3. More..
 
