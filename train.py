@@ -77,6 +77,9 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('--num_workers', default=2, type=int, 
+                        help='dataloader num_workers for train')
+
     parser.add_argument('--dim_embed', default=512, type=int, 
                         help='transformer encoder embedding size for train')
     
