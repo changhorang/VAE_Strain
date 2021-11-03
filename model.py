@@ -11,10 +11,11 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class Transformer_encoder(nn.Module):
-    def __init__(self, dim_embed, n_feature, n_past, n_future, num_layers, dropout):
+    def __init__(self, dim_embed, n_feature, n_past, n_future, num_layers, dropout,
+                device='cuda' if torch.cuda.is_available() else 'cpu'):
         super(Transformer_encoder, self).__init__()
 
         self.n_feature = n_feature
@@ -23,6 +24,9 @@ class Transformer_encoder(nn.Module):
         self.num_layers = num_layers
         self.dim_embed = dim_embed
         self.dropout = dropout
+
+        self.args = args
+        self.device = device
 
         self.embedding = nn.Linear(n_feature, dim_embed)
 
