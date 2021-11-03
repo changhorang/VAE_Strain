@@ -1,3 +1,6 @@
+from torch.utils.data import Dataset
+
+
 class CustomDataset(Dataset):
     def __init__(self, args, df, n_past, n_future):
         self.X = []     # n_past 만큼의 feature 데이터
