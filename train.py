@@ -1,6 +1,6 @@
 import os
-from tqdm import tqdm
 import math
+import argparse
 
 import pandas as pd
 import numpy as np
@@ -11,80 +11,15 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
+from dataset import CustomDataset
 from model import Transformer_encoder
+from epoch import train_epoch, evaluate
 
-batch_size = 200
-n_past = 30
-n_future = 1
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Initializing Device: {device}')
 
-class CustomDataset(Dataset):
-    def __init__(self, df, n_past, n_future):
-        self.X = []     # n_past 만큼의 feature 데이터
-        self.y = []     # n_future 만큼의 label 데이터
-        x_col = (df.shape[1]) - 1   # df 에서 -1번째 columns 까지 x
-        
-        for i in range(n_past, len(df)):
-            self.X.append(df[i - n_past:i, 4:x_col])
-            self.y.append(df[i + n_future - 1: i + n_future, x_col])
 
-    def __len__(self):
-        return len(self.X)
-
-    def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
-
-def train_one_epoch(model, data_loader, criterion, optimizer, device):
-    model.train()
-    criterion.train()
-
-    train_loss = 0.0
-    total = len(data_loader)
-
-    for _, (X, y) in enumerate(tqdm(data_loader)):
-        X = X.float().to(device)
-        y = y.float().to(device)
-        y = y.unsqueeze(1)
-
-        output = model(X)
-        loss = criterion(output, y)
-        loss_value = loss.item()
-        train_loss += loss_value
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()    
-
-    return train_loss/total
-
-with torch.no_grad():
-    def evaluate(model, data_loader, criterion, device):
-        y_list = []
-        output_list = []
-
-        model.eval()
-        criterion.eval()
-        
-        valid_loss = 0.0
-        total = len(data_loader)
-
-        for _, (X, y) in enumerate(tqdm(data_loader)):
-            X = X.float().to(device)
-            y = y.float().to(device)
-            y = y.unsqueeze(1)
-
-            output = model(X)
-            loss = criterion(output, y)
-            loss_value = loss.item()
-            valid_loss += loss_value
-
-            y_list += y.detach().reshape(-1).tolist()
-            output_list += output.detach().reshape(-1).tolist()
-
-        return valid_loss/total, y_list, output_list
-
-def main():
+def main(args):
     # Data Setting
     # file_path = os.path.join('C:/Users/ChangHo Kim/Documents/GitHub/VAE_Strain/data')
     # data_list = os.listdir(file_path)
@@ -101,30 +36,32 @@ def main():
     df_train = total_data_scaled[:-train_valid_split]
     df_valid = total_data_scaled[-train_valid_split:]
 
-    train_data = CustomDataset(df_train, n_past, n_future)  
-    valid_data = CustomDataset(df_valid, n_past, n_future)
+    train_data = CustomDataset(args, df_train, args.n_past, args.n_future)  
+    valid_data = CustomDataset(args, df_valid, args.n_past, args.n_future)
     
-    train_loader = DataLoader(train_data, batch_size=batch_size, drop_last=True, num_workers=2)
-    valid_loader = DataLoader(valid_data, batch_size=batch_size, drop_last=True, num_workers=2)
+    train_loader = DataLoader(train_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
+    valid_loader = DataLoader(valid_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     
-    model = Transformer_encoder(dim_embed=256, n_feature=2, n_past=n_past, n_future=1, num_layers=6, dropout=0.1).to(device)
+    model = Transformer_encoder(args, dim_embed=args.dim_embed, n_feature=args.n_feature, 
+                                n_past=args.n_past, n_future=args.n_future, num_layers=args.num_layers,
+                                dropout=args.dropout).to(device)
     criterion = nn.MSELoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    # optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
 
-
-    # Train
-    epochs = 50 # 30 이상에서 더이상 학습이 되지 않음
+    # args.epochs = 50 # 30 이상에서 더이상 학습이 되지 않음
     print("Start Training..")
-    for epoch in range(1, epochs):
-        print(f"Epoch : {epoch}/{epochs}")
-        epoch_loss = train_one_epoch(model, train_loader, criterion, optimizer, device)
+    for epoch in range(1, args.epochs):
+        print(f"Epoch : {epoch}/{args.epochs}")
+        epoch_loss = train_epoch(args, model, train_loader, criterion, optimizer, device)
         print(f"Training Loss: {epoch_loss:.5f}")
     
 
-    valid_loss, y_list, output_list = evaluate(model, valid_loader, criterion, device)
+    valid_loss, y_list, output_list = evaluate(args, model, valid_loader, criterion, device)
     rmse = np.sqrt(valid_loss)
     print(f"Validation Loss: {valid_loss:.5f}")
     print(f'RMSE is {rmse:.5f}')
+
     
     plt.clf()
     plt.figure(figsize=(10, 8))
@@ -133,9 +70,38 @@ def main():
     data_path = os.path.join(os.getcwd(), "figure_save")
     if not os.path.exists(data_path):
         os.mkdir(data_path)
-    plt.savefig(f"{data_path}/figure_e{int(epoch)+1}_p{n_past}_b{batch_size}.png")
+    plt.savefig(f"{data_path}/figure_epoch{int(args.epoch)+1}_past{args.n_past}_batch{args.batch_size}.png")
     # print(output_list)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--dim_embed', default=512, type=int, 
+                        help='transformer encoder embedding size for train')
+    
+    parser.add_argument('--num_layers', default=2, type=int, 
+                        help='transformer encoder num_layers size for train')
+
+    parser.add_argument('--dropout', default=0.1, type=float,
+                        help='transformer encoder dropout ratio for train')
+
+    parser.add_argument('--epochs', default=100, type=int, 
+                        help='epochs for train')
+
+    parser.add_argument('--lr', default=1e-5, type=float, 
+                        help='optimizer learning rate for train')
+
+    parser.add_argument('--batch_size', default=200, type=int, 
+                        help='batch size for train')
+
+    parser.add_argument('--n_past', default=30, type=int, 
+                        help='n_past size for train')
+
+    parser.add_argument('--n_future', default=1, type=int, 
+                        help='n_future size for train')
+
+    args = parser.parse_args()
+
+
+    main(args)
