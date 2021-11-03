@@ -104,6 +104,9 @@ if __name__ == "__main__":
     parser.add_argument('--n_future', default=1, type=int, 
                         help='n_future size for train')
 
+    parser.add_argument('--n_feature', default=2, type=int, 
+                        help='n_feature size for train')
+
     args = parser.parse_args()
 
 
