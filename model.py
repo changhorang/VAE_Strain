@@ -14,7 +14,7 @@ from torch.utils.data import Dataset, DataLoader
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class Transformer_encoder(nn.Module):
-    def __init__(self, dim_embed, n_feature, n_past, n_future, num_layers, dropout,
+    def __init__(self, args, dim_embed, n_feature, n_past, n_future, num_layers, dropout,
                 device='cuda' if torch.cuda.is_available() else 'cpu'):
         super(Transformer_encoder, self).__init__()
 
