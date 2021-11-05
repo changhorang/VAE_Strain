@@ -1,3 +1,5 @@
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,7 +16,7 @@ class Transformer_encoder_VAE(nn.Module):
         self.n_feature = n_feature
         self.n_past = n_past
         self.latent_size = latent_size
-        # self.n_future = n_future
+        self.n_future = n_future
         self.num_layers = num_layers
         self.dim_embed = dim_embed
         self.dropout = dropout
@@ -52,13 +54,13 @@ class Transformer_encoder_VAE(nn.Module):
     def forward(self, x):
         mean, log_var = self.encode(x)
         z = self.reparameterize(mean, log_var) # z : [batch_size, n_past, latent_size]
-    
+
         out = self.decoder(z).transpose(1, 2)
         out = self.decoder2(out)
 
         # log_prob = F.log_softmax(out)
 
-        return z, mean, log_var, out
+        return out #, z, mean, log_var, out
 
 
     def reparameterize(self, mean, log_var):

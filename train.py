@@ -63,16 +63,19 @@ def main(args):
     print(f"Validation Loss: {valid_loss:.5f}")
     print(f'RMSE is {rmse:.5f}')
 
-    
     plt.clf()
     plt.figure(figsize=(10, 8))
-    plt.plot(y_list)
-    plt.plot(output_list)
+    plt.plot(y_list, label='target')
+    plt.plot(output_list, label='prediction')
+
+    plt.title('prediction vs target')
+    plt.show()
+    
     data_path = os.path.join(os.getcwd(), "figure_save")
     if not os.path.exists(data_path):
         os.mkdir(data_path)
-    plt.savefig(f"{data_path}/figure_epoch{int(args.epoch)+1}_past{args.n_past}_batch{args.batch_size}.png")
-    # print(output_list)
+    plt.savefig(f"{data_path}/figure_epoch{int(args.epochs)+1}_past{args.n_past}_batch{args.batch_size}.png")
+    
 
 
 if __name__ == "__main__":
