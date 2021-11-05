@@ -1,7 +1,7 @@
 import torch
 from tqdm.auto import tqdm
 
-def train_epoch(model, data_loader, criterion, optimizer, device):
+def train_epoch(args, model, data_loader, criterion, optimizer, device):
     model.train()
     criterion.train()
 

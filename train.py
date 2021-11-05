@@ -12,8 +12,9 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 from dataset import CustomDataset
-from model import Transformer_encoder
+from model import Transformer_encoder_VAE
 from epoch import train_epoch, evaluate
+from utils import vae_loss
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Initializing Device: {device}')
@@ -25,7 +26,7 @@ def main(args):
     # data_list = os.listdir(file_path)
     # for i in data_list:
 
-    file_path = os.path.join(os.getcwd(), './data/01000002.txt')
+    file_path = os.path.join(os.getcwd(), args.dataset_path)
     total_data = pd.read_csv(file_path, sep='\t')
 
     minmax_scaler = MinMaxScaler(feature_range=(-1, 1))
@@ -42,9 +43,9 @@ def main(args):
     train_loader = DataLoader(train_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     valid_loader = DataLoader(valid_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     
-    model = Transformer_encoder(args, dim_embed=args.dim_embed, n_feature=args.n_feature, 
-                                n_past=args.n_past, n_future=args.n_future, num_layers=args.num_layers,
-                                dropout=args.dropout).to(device)
+    model = Transformer_encoder_VAE(args, dim_embed=args.dim_embed, n_feature=args.n_feature, 
+                                n_past=args.n_past, latent_size=args.latent_size, n_future=args.n_future,
+                                num_layers=args.num_layers, dropout=args.dropout).to(device)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     # optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
@@ -106,6 +107,13 @@ if __name__ == "__main__":
 
     parser.add_argument('--n_feature', default=2, type=int, 
                         help='n_feature size for train')
+
+    parser.add_argument('--latent_size', default=32, type=int, 
+                        help='latent_size size for VAE')
+
+    parser.add_argument('--dataset_path', type=str,
+                        default='./data/01000002.txt',
+                        help='Path of dataset')
 
     args = parser.parse_args()
 

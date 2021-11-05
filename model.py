@@ -1,65 +1,72 @@
-import os
-from tqdm import tqdm
-import math
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
-
 import torch
 import torch.nn as nn
+from torch.nn.functional import F
+
 from torch.utils.data import Dataset, DataLoader
 
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+torch.manual_seed(1)
 
-class Transformer_encoder(nn.Module):
-    def __init__(self, args, dim_embed, n_feature, n_past, n_future, num_layers, dropout,
-                device='cuda' if torch.cuda.is_available() else 'cpu'):
-        super(Transformer_encoder, self).__init__()
+class Transformer_encoder_VAE(nn.Module):
+    def __init__(self, args, dim_embed, n_feature, n_past, latent_size, n_future, num_layers, dropout):
+        super(Transformer_encoder_VAE, self).__init__()
 
         self.n_feature = n_feature
         self.n_past = n_past
-        self.n_future = n_future
+        self.latent_size = latent_size
+        # self.n_future = n_future
         self.num_layers = num_layers
         self.dim_embed = dim_embed
         self.dropout = dropout
-
         self.args = args
-        self.device = device
 
         self.embedding = nn.Linear(n_feature, dim_embed)
-
         self.pos_encoder = PositionalEncoding(dim_embed)
-
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=dim_embed, nhead=2, dropout=dropout)
-
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
 
-        self.decoder = nn.Linear(dim_embed, n_future)
+        self.linear_mean1 = nn.Linear(dim_embed, latent_size*2)
+        self.linear_mean2 = nn.Linear(latent_size*2, latent_size)
+        self.linear_log_var1 = nn.Linear(dim_embed, latent_size*2)
+        self.linear_log_var2 = nn.Linear(latent_size*2, latent_size)
 
+        self.linear_mean = nn.Sequential(self.linear_mean1, nn.ReLU(), self.linear_mean2)
+        self.linear_log_var = nn.Sequential(self.linear_log_var1, nn.ReLU(), self.linear_log_var2)
+
+        self.decoder = nn.Linear(latent_size, n_future)
         self.decoder2 = nn.Linear(n_past, n_future)
 
-        self.init_weights()
-
-    def init_weights(self):
-        initrange = 0.1    
-        self.decoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
-
-    def forward(self, x):
+    def encode(self, x):
         mask = self.generate_square_subsequent_mask(len(x)).to(device)
         src = self.embedding(x)*math.sqrt(self.dim_embed)
         src = self.pos_encoder(src)
 
         out = self.encoder_layer(src)
         out = self.transformer_encoder(out, mask)
+
+        mean = self.linear_mean(out)
+        log_var = self.linear_log_var(out)
+
+        return mean, log_var
+
+    def forward(self, x):
+        mean, log_var = self.encode(x)
+        z = self.reparameterize(mean, log_var) # z : [batch_size, n_past, latent_size]
     
-        out = self.decoder(out).transpose(1, 2)
+        out = self.decoder(z).transpose(1, 2)
         out = self.decoder2(out)
 
-        return out
+        # log_prob = F.log_softmax(out)
 
+        return z, mean, log_var, out
+
+
+    def reparameterize(self, mean, log_var):
+        eps = torch.randn(mean.size()).to(device)
+        std = torch.exp(log_var*0.5)
+        z = mean + eps*std # z : [batch_size, n_past, latent_size]
+
+        return z
 
     def generate_square_subsequent_mask(self, sz):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
@@ -80,3 +87,17 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return x + self.pe[:x.size(0), :]
+
+# class VAE(nn.Module):
+#     def __init__(self, encoder, decoder, n_steps=None):
+#         super(VAE, self).__init__()
+#         self.encoder = encoder
+#         self.decoder = decoder
+
+#         self.register_buffer('steps_seen', torch.tensor(0, dtype=torch.long))
+#         self.register_buffer('kld_max', torch.tensor(1.0, dtype=torch.float))
+#         self.register_buffer('kld_weight', torch.tensor(0.0, dtype=torch.float))
+#         if n_steps is not None:
+#             self.register_buffer('kld_inc', torch.tensor((self.kld_max - self.kld_weight) / (n_steps//2), dtype=torch.float))
+#         else:
+#             self.register_buffer('kld_inc', torch.tensor(0, dtype=torch.float))
