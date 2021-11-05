@@ -69,7 +69,7 @@ def main(args):
     plt.plot(output_list, label='prediction')
 
     plt.title('prediction vs target')
-    plt.show()
+    plt.legend()
     
     data_path = os.path.join(os.getcwd(), "figure_save")
     if not os.path.exists(data_path):
