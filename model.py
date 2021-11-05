@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.nn.functional import F
+import torch.nn.functional as F
 
 from torch.utils.data import Dataset, DataLoader
 
