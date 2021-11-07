@@ -14,13 +14,17 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
 
     for _, (X, y) in enumerate(tqdm(data_loader)):
         X = X.float().to(device)
-        y = y.float().to(device) # y : [batch_size, n_fuutre, 1]
-        y = y.unsqueeze(1)
+        y = y.float().to(device) # y : [batch_size, n_fuutre]
+        # y = y.unsqueeze(1)
 
-        output, mean, log_var = model(X)
-        loss = criterion(output, y, mean, log_var, step)
-        loss_value = loss.item()
-        train_loss += loss_value
+        output, mean, log_var, log_prob = model(X)
+        NLL_loss, KL_loss, KL_weight = criterion(log_prob, y, mean, log_var, step)
+        loss = (NLL_loss + KL_weight*KL_loss)/args.batch_size
+        train_loss += loss
+        
+        # loss = criterion(log_prob, y, mean, log_var, step)
+        # loss_value = loss.item()
+        # train_loss += loss_value
 
         optimizer.zero_grad()
         loss.backward()
@@ -46,12 +50,16 @@ with torch.no_grad():
         for _, (X, y) in enumerate(tqdm(data_loader)):
             X = X.float().to(device)
             y = y.float().to(device)
-            y = y.unsqueeze(1)
+            # y = y.unsqueeze(1)
 
-            output, mean, log_var = model(X)
-            loss = criterion(output, y, mean, log_var, step)
-            loss_value = loss.item()
-            valid_loss += loss_value
+            output, mean, log_var, log_prob = model(X)
+            NLL_loss, KL_loss, KL_weight = criterion(log_prob, y, mean, log_var, step)
+            loss = (NLL_loss + KL_weight*KL_loss)/args.batch_size
+            valid_loss += loss
+
+            # loss = criterion(log_prob, y, mean, log_var, step)
+            # loss_value = loss.item()
+            # valid_loss += loss_value
 
             y_list += y.detach().reshape(-1).tolist()
             output_list += output.detach().reshape(-1).tolist()
