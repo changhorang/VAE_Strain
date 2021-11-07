@@ -55,12 +55,12 @@ class Transformer_encoder_VAE(nn.Module):
         mean, log_var = self.encode(x)
         z = self.reparameterize(mean, log_var) # z : [batch_size, n_past, latent_size]
 
-        out = self.decoder(z).transpose(1, 2)
+        out = self.decoder(z).transpose(2, 1)
         out = self.decoder2(out)
 
         # log_prob = F.log_softmax(out)
 
-        return out #, z, mean, log_var, out
+        return out, mean, log_var #, z
 
 
     def reparameterize(self, mean, log_var):

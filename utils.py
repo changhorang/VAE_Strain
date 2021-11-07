@@ -3,17 +3,16 @@ import torch.nn as nn
 import numpy as np
 
 class vae_loss(nn.Module):
-    def __init__(self, pad_idx=0, anneal_function='logistic', k=0.0025, x0=2500):
+    def __init__(self, anneal_function='logistic', k=0.0025, x0=2500):
         """Initialize Loss for VAE model.
         
         Args:
-            pad_idx (int): index of <pad> token --삭제?
             anneal_function (str): anneal function for KL Divergence
             k (float): kl_anneal_function parameter
             x0 (int): kl_anneal_function parameter
         """
         super(vae_loss, self).__init__()
-        self.NLL = nn.NLLLoss(ignore_index=pad_idx, reduction='sum')
+        self.NLL = nn.NLLLoss(reduction='sum')
         self.anneal_function = anneal_function.lower()
         self.k = k
         self.x0 = x0
@@ -34,7 +33,7 @@ class vae_loss(nn.Module):
         else:
             raise NotImplementedError("Only ['logistic', 'linear', 'none'] are supported for anneal_function")
         
-    def forward(self, log_prob, target, length, mean, logvar, step):
+    def forward(self, log_prob, target, length, mean, log_var, step):
         """Compute NLL loss and KL Divergence loss for VAE model
         Args:
             log_prob (torch.Tensor): log_prob of predicted token
@@ -48,11 +47,15 @@ class vae_loss(nn.Module):
             KL_loss (torch.Tensor): Kullback–Leibler Divergence loss
             KL_weight (float): annealed kl_weight
         """
-        log_prob = log_prob[:, :torch.max(length).item()].contiguous().view(-1, log_prob.size(2)) # log_prob: (batch_size * max_len, vocab_size)
-        target = target[:, :torch.max(length).item()].contiguous().view(-1) # target: (batch_size * max_len)
+        
+        # log_prob = log_prob[:, :torch.max(length).item()].contiguous().view(-1, log_prob.size(2)) 
+        # log_prob: (batch_size * max_len, vocab_size)
+        
+        # target = target[:, :torch.max(length).item()].contiguous().view(-1) 
+        # target: (batch_size * max_len)
         
         NLL_loss = self.NLL(log_prob, target)
-        KL_div = -0.5*torch.sum(1 + logvar - mean.pow(2) - logvar.exp())
+        KL_loss = -0.5*torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
         KL_weight = self.kl_anneal_function(step)
 
-        return NLL_loss, KL_div, KL_weight
+        return NLL_loss, KL_loss, KL_weight
