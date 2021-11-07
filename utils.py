@@ -33,14 +33,14 @@ class vae_loss(nn.Module):
         else:
             raise NotImplementedError("Only ['logistic', 'linear', 'none'] are supported for anneal_function")
         
-    def forward(self, log_prob, target, length, mean, log_var, step):
+    def forward(self, output, target, mean, log_var, step):
         """Compute NLL loss and KL Divergence loss for VAE model
         Args:
             log_prob (torch.Tensor): log_prob of predicted token
             target (torch.Tensor): target token
             length (torch.Tensor): non-pad length of target token
             mean (torch.Tensor): mean of latent vector
-            logvar (torch.Tensor): log variance of latent vector
+            log_var (torch.Tensor): log variance of latent vector
             step (int): current training step
         Returns:
             NLL_loss (torch.Tensor): Negative Log Likelihood Loss
@@ -54,7 +54,7 @@ class vae_loss(nn.Module):
         # target = target[:, :torch.max(length).item()].contiguous().view(-1) 
         # target: (batch_size * max_len)
         
-        NLL_loss = self.NLL(log_prob, target)
+        NLL_loss = self.NLL(output, target)
         KL_loss = -0.5*torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
         KL_weight = self.kl_anneal_function(step)
 
