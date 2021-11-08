@@ -1,7 +1,10 @@
 import torch
 from tqdm.auto import tqdm
 
+step = 0
+
 def train_epoch(args, model, data_loader, criterion, optimizer, device):
+    global step
 
     model.train()
     criterion.train()
@@ -15,7 +18,7 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
         y = y.unsqueeze(1)
 
         output, mean, log_var = model(X)
-        loss = criterion(output, y, mean, log_var)/args.batch_size
+        loss = criterion(output, y, mean, log_var, step)/args.batch_size
         train_loss += loss
         
         # loss = criterion(log_prob, y, mean, log_var, step)
@@ -26,10 +29,13 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
         loss.backward()
         optimizer.step()
 
+        step += 1
+
     return train_loss/total
 
 
 def evaluate(args, model, data_loader, criterion, device):
+    global step
 
     y_list = []
     output_list = []
@@ -46,7 +52,7 @@ def evaluate(args, model, data_loader, criterion, device):
             y = y.unsqueeze(1)
 
             output, mean, log_var = model(X)
-            loss = criterion(output, y, mean, log_var)/args.batch_size
+            loss = criterion(output, y, mean, log_var, step)/args.batch_size
             valid_loss += loss
 
             # loss = criterion(log_prob, y, mean, log_var, step)

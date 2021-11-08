@@ -77,7 +77,7 @@ def main(args):
     data_path = os.path.join(os.getcwd(), "figure_save")
     if not os.path.exists(data_path):
         os.mkdir(data_path)
-    plt.savefig(f"{data_path}/figure_epoch{int(args.epochs)}_past{args.n_past}_batch{args.batch_size}.png")
+    plt.savefig(f"{data_path}/VAE_figure_epoch{int(args.epochs)}_past{args.n_past}_batch{args.batch_size}.png")
     
 
 
