@@ -15,7 +15,7 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
         y = y.unsqueeze(1)
 
         output, mean, log_var = model(X)
-        loss = criterion(output, y, mean, log_var)
+        loss = criterion(output, y, mean, log_var)/args.batch_size
         train_loss += loss
         
         # loss = criterion(log_prob, y, mean, log_var, step)
@@ -46,7 +46,7 @@ def evaluate(args, model, data_loader, criterion, device):
             y = y.unsqueeze(1)
 
             output, mean, log_var = model(X)
-            loss = criterion(output, y, mean, log_var)
+            loss = criterion(output, y, mean, log_var)/args.batch_size
             valid_loss += loss
 
             # loss = criterion(log_prob, y, mean, log_var, step)
