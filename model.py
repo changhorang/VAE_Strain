@@ -58,9 +58,10 @@ class Transformer_encoder_VAE(nn.Module):
         out = self.decoder(z).transpose(2, 1)
         out = self.decoder2(out)#.squeeze()
 
-        log_prob = F.log_softmax(out) # log_prob: [batch_size, n_future, n_future]
+        # log_prob = F.log_softmax(out, dim=-1) 
+        # log_prob: [batch_size, n_future, n_future]
 
-        return out, mean, log_var, log_prob #, z
+        return out, mean, log_var#, log_prob #, z
 
 
     def reparameterize(self, mean, log_var):
@@ -89,17 +90,3 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return x + self.pe[:x.size(0), :]
-
-# class VAE(nn.Module):
-#     def __init__(self, encoder, decoder, n_steps=None):
-#         super(VAE, self).__init__()
-#         self.encoder = encoder
-#         self.decoder = decoder
-
-#         self.register_buffer('steps_seen', torch.tensor(0, dtype=torch.long))
-#         self.register_buffer('kld_max', torch.tensor(1.0, dtype=torch.float))
-#         self.register_buffer('kld_weight', torch.tensor(0.0, dtype=torch.float))
-#         if n_steps is not None:
-#             self.register_buffer('kld_inc', torch.tensor((self.kld_max - self.kld_weight) / (n_steps//2), dtype=torch.float))
-#         else:
-#             self.register_buffer('kld_inc', torch.tensor(0, dtype=torch.float))

@@ -1,10 +1,7 @@
 import torch
 from tqdm.auto import tqdm
 
-step = 0
-
 def train_epoch(args, model, data_loader, criterion, optimizer, device):
-    global step
 
     model.train()
     criterion.train()
@@ -14,12 +11,11 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
 
     for _, (X, y) in enumerate(tqdm(data_loader)):
         X = X.float().to(device)
-        y = y.float().to(device) # y : [batch_size, n_fuutre]
-        # y = y.unsqueeze(1)
+        y = y.float().to(device) # y : [batch_size, n_fuutre, 1]
+        y = y.unsqueeze(1)
 
-        output, mean, log_var, log_prob = model(X)
-        NLL_loss, KL_loss, KL_weight = criterion(log_prob, y, mean, log_var, step)
-        loss = (NLL_loss + KL_weight*KL_loss)/args.batch_size
+        output, mean, log_var = model(X)
+        loss = criterion(output, y, mean, log_var)
         train_loss += loss
         
         # loss = criterion(log_prob, y, mean, log_var, step)
@@ -30,31 +26,27 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
         loss.backward()
         optimizer.step()
 
-        step += 1
-
     return train_loss/total
 
-with torch.no_grad():
-    def evaluate(args, model, data_loader, criterion, device):
-        global step
 
-        y_list = []
-        output_list = []
+def evaluate(args, model, data_loader, criterion, device):
 
-        model.eval()
-        criterion.eval()
+    y_list = []
+    output_list = []
+
+    model.eval()
+    criterion.eval()
         
-        valid_loss = 0.0
-        total = len(data_loader)
-
+    valid_loss = 0.0
+    total = len(data_loader)
+    with torch.no_grad():
         for _, (X, y) in enumerate(tqdm(data_loader)):
             X = X.float().to(device)
             y = y.float().to(device)
-            # y = y.unsqueeze(1)
+            y = y.unsqueeze(1)
 
-            output, mean, log_var, log_prob = model(X)
-            NLL_loss, KL_loss, KL_weight = criterion(log_prob, y, mean, log_var, step)
-            loss = (NLL_loss + KL_weight*KL_loss)/args.batch_size
+            output, mean, log_var = model(X)
+            loss = criterion(output, y, mean, log_var)
             valid_loss += loss
 
             # loss = criterion(log_prob, y, mean, log_var, step)
@@ -64,4 +56,4 @@ with torch.no_grad():
             y_list += y.detach().reshape(-1).tolist()
             output_list += output.detach().reshape(-1).tolist()
 
-        return valid_loss/total, y_list, output_list
+    return valid_loss/total, y_list, output_list

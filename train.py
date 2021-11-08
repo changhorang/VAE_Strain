@@ -29,11 +29,11 @@ def main(args):
     file_path = os.path.join(os.getcwd(), args.dataset_path)
     total_data = pd.read_csv(file_path, sep='\t')
 
-    minmax_scaler = MinMaxScaler(feature_range=(-1, 1))
+    minmax_scaler = MinMaxScaler(feature_range=(-1, 1)) # 음수 값이 있으면 -1~1로 range 설정
     minmax_scaler = minmax_scaler.fit(total_data)
     total_data_scaled = minmax_scaler.transform(total_data)
 
-    train_valid_split = int(len(total_data_scaled) * 0.3)
+    train_valid_split = int(len(total_data_scaled)*0.3)
     df_train = total_data_scaled[:-train_valid_split]
     df_valid = total_data_scaled[-train_valid_split:]
 
@@ -62,7 +62,7 @@ def main(args):
     
 
     valid_loss, y_list, output_list = evaluate(args, model, valid_loader, criterion, device)
-    rmse = np.sqrt(valid_loss)
+    rmse = np.sqrt(valid_loss.cpu())
     print(f"Validation Loss: {valid_loss:.5f}")
     print(f'RMSE is {rmse:.5f}')
 
