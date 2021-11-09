@@ -26,7 +26,7 @@
 
 ![figure_epoch201_past30_batch200.png](./figure_save/figure_epoch201_past30_batch200.png)
 
-![VAE_figure_epoch100_past30_batch200.png](./figure_save/figure_epoch100_past30_batch200.png)
+![VAE_figure_epoch100_past30_batch200.png](./figure_save/VAE_figure_epoch100_past30_batch200.png)
     
 ## 3. More..
 
