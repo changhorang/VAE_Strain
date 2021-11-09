@@ -16,22 +16,26 @@
     
     - 전체적인 경향성은 각 parameter별로 따라가는 것으로 확인은 되었지만, 예측된 값은 아직 큰 차이가 있는 것으로 확인
 
-    - 사용한 Data file은 01000002.txt이며, 진행된 결과는 figure_save에 저장된 이미지와 같다 (추가 ~~예정~~).
-
     - 과거 값을 이용하는 경우, n_past는 30정도가 제일 양호하게 결과가 나옴 (batch_szie=200, epoch=200 기준)
 
     - 극단값은 조금씩 잡는듯 하지만, 아직은 모델이 추세를 따라가는 수준으로 성능이 좋지 못한 것으로 보임
 
+    - VAE loss(MSELoss+KLloss)를 반영하였지만, 예측값이 오히려 더 안나오는 결과가 나옴 (KL loss가 잘 잡히지 않았거나, Transformer Encoder에는 VAE 적용이 조금 어렵다고 생각됨)
+
+    - MSE Loss만 적용 시에는 극단값을 조금 더 잘 잡아내는 수준
+
 ![figure_epoch201_past30_batch200.png](./figure_save/figure_epoch201_past30_batch200.png)
+
+![VAE_figure_epoch100_past30_batch200.png](./figure_save/figure_epoch100_past30_batch200.png)
     
 ## 3. More..
 
-    ~~- 아직 train을 진행하는 과정에 있으며, 전체 파일에 대한 결과 확인이 필요 (data import 시키는 코드 작업 진행중...)~~
-
-    ~~- argparse를 이용한 parameter들이 수정이 가능하도록 코드 수정 예정 (2021.11.01 기준)~~ (반영 완료)
-
     - VAE를 통해서 나온 샘플들이 극단값을 잘 잡아내는지 확인
 
-    - VAE에 대한 학습이 명확하게 하여 모델 리뷰 필요 (loss 반영)
+    - VAE loss(MSELoss+KLloss)를 반영하였지만, 예측값이 오히려 더 안나오는 결과가 나옴 (KL loss가 잘 잡히지 않았거나, Transformer Encoder에는 VAE 적용이 조금 어렵다고 생각됨)
+
+    - MSE Loss만 적용 시에는 극단값을 조금 더 잘 잡아내는 수준
+
+
 
 
