@@ -18,7 +18,7 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
         y = y.unsqueeze(1)
 
         output, mean, log_var = model(X)
-        loss = criterion(output, y, mean, log_var, step)/args.batch_size
+        loss = criterion(output, y, mean, log_var, step)#/args.batch_size
         train_loss += loss
         
         # loss = criterion(log_prob, y, mean, log_var, step)
@@ -33,26 +33,26 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
 
     return train_loss/total
 
+with torch.no_grad():
+    def evaluate(args, model, data_loader, criterion, device):
+        global step
 
-def evaluate(args, model, data_loader, criterion, device):
-    global step
+        y_list = []
+        output_list = []
 
-    y_list = []
-    output_list = []
-
-    model.eval()
-    criterion.eval()
+        model.eval()
+        criterion.eval()
+            
+        valid_loss = 0.0
+        total = len(data_loader)
         
-    valid_loss = 0.0
-    total = len(data_loader)
-    with torch.no_grad():
         for _, (X, y) in enumerate(tqdm(data_loader)):
             X = X.float().to(device)
             y = y.float().to(device)
             y = y.unsqueeze(1)
 
             output, mean, log_var = model(X)
-            loss = criterion(output, y, mean, log_var, step)/args.batch_size
+            loss = criterion(output, y, mean, log_var, step)#/args.batch_size
             valid_loss += loss
 
             # loss = criterion(log_prob, y, mean, log_var, step)
@@ -62,4 +62,4 @@ def evaluate(args, model, data_loader, criterion, device):
             y_list += y.detach().reshape(-1).tolist()
             output_list += output.detach().reshape(-1).tolist()
 
-    return valid_loss/total, y_list, output_list
+        return valid_loss/total, y_list, output_list
