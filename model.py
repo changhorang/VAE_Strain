@@ -27,8 +27,11 @@ class Transformer_encoder_VAE(nn.Module):
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=dim_embed, nhead=2, dropout=dropout)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
 
+        # mean
         self.linear_mean1 = nn.Linear(dim_embed, latent_size*2)
         self.linear_mean2 = nn.Linear(latent_size*2, latent_size)
+        
+        # log_var
         self.linear_log_var1 = nn.Linear(dim_embed, latent_size*2)
         self.linear_log_var2 = nn.Linear(latent_size*2, latent_size)
 
@@ -48,11 +51,8 @@ class Transformer_encoder_VAE(nn.Module):
 
         mean = self.linear_mean(out)
         log_var = self.linear_log_var(out)
+        # mean, log_var : [batch_size, n_past, latent_size]
 
-        # return mean, log_var
-
-    # def forward(self, x):
-    #     mean, log_var = self.encode(x)
         z = self.reparameterize(mean, log_var) # z : [batch_size, n_past, latent_size]
 
         out = self.decoder(z).transpose(1, 2)

@@ -51,17 +51,17 @@ def main(args):
     # criterion = nn.MSELoss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
+    # optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
-    # args.epochs = 50 # 30 이상에서 더이상 학습이 되지 않음
+
     print("Start Training..")
     for epoch in range(1, args.epochs):
         print(f"Epoch : {epoch}/{args.epochs}")
-        epoch_loss = train_epoch(args, model, train_loader, criterion, optimizer, device)
+        epoch_loss = train_epoch(model, train_loader, criterion, optimizer, device)
         print(f"Training Loss: {epoch_loss:.5f}")
     
 
-        valid_loss, y_list, output_list = evaluate(args, model, valid_loader, criterion, device)
+        valid_loss, y_list, output_list = evaluate(model, valid_loader, criterion, device)
         rmse = np.sqrt(valid_loss.cpu())
         print(f"Validation Loss: {valid_loss:.5f}")
         print(f'RMSE is {rmse:.5f}')
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_feature', default=2, type=int, 
                         help='n_feature size for train')
 
-    parser.add_argument('--latent_size', default=32, type=int, 
+    parser.add_argument('--latent_size', default=8, type=int, 
                         help='latent_size size for VAE')
 
     parser.add_argument('--dataset_path', type=str,

@@ -3,7 +3,7 @@ from tqdm.auto import tqdm
 
 step = 0
 
-def train_epoch(args, model, data_loader, criterion, optimizer, device):
+def train_epoch(model, data_loader, criterion, optimizer, device):
     global step
 
     model.train()
@@ -34,7 +34,7 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
     return train_loss/total
 
 
-def evaluate(args, model, data_loader, criterion, device):
+def evaluate(model, data_loader, criterion, device):
     global step
 
     y_list = []
