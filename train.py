@@ -47,22 +47,22 @@ def main(args):
                                 n_past=args.n_past, latent_size=args.latent_size, n_future=args.n_future,
                                 num_layers=args.num_layers, dropout=args.dropout).to(device)
     
-    criterion = vae_loss()
-    # criterion = nn.MSELoss()
+    # criterion = vae_loss()
+    criterion = nn.MSELoss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     # optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
 
     print("Start Training..")
-    for epoch in range(1, args.epochs):
+    for epoch in range(1, args.epochs+1):
         print(f"Epoch : {epoch}/{args.epochs}")
         epoch_loss = train_epoch(model, train_loader, criterion, optimizer, device)
         print(f"Training Loss: {epoch_loss:.5f}")
     
 
         valid_loss, y_list, output_list = evaluate(model, valid_loader, criterion, device)
-        rmse = np.sqrt(valid_loss.cpu())
+        rmse = np.sqrt(valid_loss)
         print(f"Validation Loss: {valid_loss:.5f}")
         print(f'RMSE is {rmse:.5f}')
 
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_feature', default=2, type=int, 
                         help='n_feature size for train')
 
-    parser.add_argument('--latent_size', default=8, type=int, 
+    parser.add_argument('--latent_size', default=4, type=int, 
                         help='latent_size size for VAE')
 
     parser.add_argument('--dataset_path', type=str,

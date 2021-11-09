@@ -65,8 +65,8 @@ class Transformer_encoder_VAE(nn.Module):
 
 
     def reparameterize(self, mean, log_var):
-        eps = torch.randn(mean.size()).to(device)
         std = torch.exp(log_var*0.5)
+        eps = torch.randn(mean.size()).to(device)
         z = mean + eps*std # z : [batch_size, n_past, latent_size]
 
         return z
