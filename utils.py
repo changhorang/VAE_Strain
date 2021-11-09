@@ -30,7 +30,7 @@ class vae_loss(nn.Module):
 
     def forward(self, output, target, mean, log_var, step):
         recon_loss = self.loss_fn(output, target)
-        KL_loss = -0.5*torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+        KL_loss = (-0.5*torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), 1)).mean()
         # KL_weight = self.kl_anneal_function(step)
         
         total_loss = recon_loss + KL_loss#*KL_weight
