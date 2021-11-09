@@ -33,19 +33,19 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device):
 
     return train_loss/total
 
-with torch.no_grad():
-    def evaluate(args, model, data_loader, criterion, device):
-        global step
 
-        y_list = []
-        output_list = []
+def evaluate(args, model, data_loader, criterion, device):
+    global step
 
-        model.eval()
-        criterion.eval()
-            
-        valid_loss = 0.0
-        total = len(data_loader)
+    y_list = []
+    output_list = []
+    
+    model.eval()
+    criterion.eval()
         
+    valid_loss = 0.0
+    total = len(data_loader)
+    with torch.no_grad():
         for _, (X, y) in enumerate(tqdm(data_loader)):
             X = X.float().to(device)
             y = y.float().to(device)
@@ -62,4 +62,4 @@ with torch.no_grad():
             y_list += y.detach().reshape(-1).tolist()
             output_list += output.detach().reshape(-1).tolist()
 
-        return valid_loss/total, y_list, output_list
+    return valid_loss/total, y_list, output_list
