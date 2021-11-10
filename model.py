@@ -38,13 +38,7 @@ class Transformer_encoder_VAE(nn.Module):
         self.linear_mean = nn.Sequential(self.linear_mean1, nn.ReLU(), self.linear_mean2)
         self.linear_log_var = nn.Sequential(self.linear_log_var1, nn.ReLU(), self.linear_log_var2)
 
-        self.decoder0 = nn.Linear(latent_size, dim_embed)
-        # self.decoder = nn.Linear(latent_size, n_future)
-        
-        self.decoder1_1 = nn.Linear(dim_embed, n_future*4)
-        self.decoder1_2 = nn.Linear(n_future*4, n_future)
-        
-        self.decoder1 = nn.Sequential(self.decoder1_1, nn.ReLU(), self.decoder1_2)
+        self.decoder = nn.Linear(latent_size, n_future)
         self.decoder2 = nn.Linear(n_past, n_future)
 
     def forward(self, x):
@@ -61,9 +55,7 @@ class Transformer_encoder_VAE(nn.Module):
 
         z = self.reparameterize(mean, log_var) # z : [batch_size, n_past, latent_size]
 
-        out = self.decoder0(z)
-
-        out = self.decoder1(out).transpose(1, 2)
+        out = self.decoder1(z).transpose(1, 2)
         out = self.decoder2(out)#.squeeze()
 
         # log_prob = F.log_softmax(out, dim=-1) 
