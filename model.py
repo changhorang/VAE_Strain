@@ -38,7 +38,7 @@ class Transformer_encoder_VAE(nn.Module):
         self.linear_mean = nn.Sequential(self.linear_mean1, nn.ReLU(), self.linear_mean2)
         self.linear_log_var = nn.Sequential(self.linear_log_var1, nn.ReLU(), self.linear_log_var2)
 
-        self.decoder = nn.Linear(latent_size, n_future)
+        self.decoder1 = nn.Linear(latent_size, n_future)
         self.decoder2 = nn.Linear(n_past, n_future)
 
     def forward(self, x):
