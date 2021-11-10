@@ -61,10 +61,10 @@ def main(args):
         print(f"Training Loss: {epoch_loss:.5f}")
     
 
-        valid_loss, y_list, output_list = evaluate(model, valid_loader, criterion, device)
-        rmse = np.sqrt(valid_loss)
-        print(f"Validation Loss: {valid_loss:.5f}")
-        print(f'RMSE is {rmse:.5f}')
+    valid_loss, y_list, output_list = evaluate(model, valid_loader, criterion, device)
+    rmse = np.sqrt(valid_loss)
+    print(f"Validation Loss: {valid_loss:.5f}")
+    print(f'RMSE is {rmse:.5f}')
 
     plt.clf()
     plt.figure(figsize=(10, 8))
