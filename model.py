@@ -35,8 +35,8 @@ class Transformer_encoder_VAE(nn.Module):
         self.linear_log_var1 = nn.Linear(dim_embed, latent_size*2)
         self.linear_log_var2 = nn.Linear(latent_size*2, latent_size)
 
-        self.linear_mean = nn.Sequential(self.linear_mean1, nn.ReLU(), self.linear_mean2)
-        self.linear_log_var = nn.Sequential(self.linear_log_var1, nn.ReLU(), self.linear_log_var2)
+        self.linear_mean = nn.Sequential(self.linear_mean1, nn.GELU(), self.linear_mean2)
+        self.linear_log_var = nn.Sequential(self.linear_log_var1, nn.GELU(), self.linear_log_var2)
 
         self.decoder1 = nn.Linear(latent_size, n_future)
         self.decoder2 = nn.Linear(n_past, n_future)
@@ -56,12 +56,13 @@ class Transformer_encoder_VAE(nn.Module):
         z = self.reparameterize(mean, log_var) # z : [batch_size, n_past, latent_size]
 
         out = self.decoder1(z).transpose(1, 2)
-        out = self.decoder2(out)#.squeeze()
+        out = self.decoder2(out) 
+        # out: [batch_size, n_future]
 
-        # log_prob = F.log_softmax(out, dim=-1) 
+        log_prob = F.log_softmax(out, dim=-1).squeeze() 
         # log_prob: [batch_size, n_future, n_future]
 
-        return out, mean, log_var#, log_prob #, z
+        return out, mean, log_var, log_prob #, z
 
 
     def reparameterize(self, mean, log_var):

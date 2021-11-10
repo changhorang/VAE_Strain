@@ -47,8 +47,8 @@ def main(args):
                                 n_past=args.n_past, latent_size=args.latent_size, n_future=args.n_future,
                                 num_layers=args.num_layers, dropout=args.dropout).to(device)
     
-    # criterion = vae_loss()
-    criterion = nn.MSELoss()
+    criterion = vae_loss()
+    # criterion = nn.MSELoss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     # optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
