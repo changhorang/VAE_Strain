@@ -111,10 +111,10 @@ if __name__ == "__main__":
     parser.add_argument('--n_future', default=1, type=int, 
                         help='n_future size for train')
 
-    parser.add_argument('--n_feature', default=2, type=int, 
+    parser.add_argument('--n_feature', default=5, type=int, 
                         help='n_feature size for train')
 
-    parser.add_argument('--latent_size', default=4, type=int, 
+    parser.add_argument('--latent_size', default=64, type=int, 
                         help='latent_size size for VAE')
 
     parser.add_argument('--dataset_path', type=str,

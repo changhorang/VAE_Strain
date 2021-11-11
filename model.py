@@ -59,10 +59,10 @@ class Transformer_encoder_VAE(nn.Module):
         out = self.decoder2(out) 
         # out: [batch_size, n_future]
 
-        log_prob = F.log_softmax(out, dim=-1).squeeze() 
+        # log_prob = F.log_softmax(out, dim=-1).squeeze() 
         # log_prob: [batch_size, n_future, n_future]
 
-        return out, mean, log_var, log_prob #, z
+        return out, mean, log_var#, log_prob #, z
 
 
     def reparameterize(self, mean, log_var):

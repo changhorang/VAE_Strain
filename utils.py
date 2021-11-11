@@ -6,8 +6,8 @@ class vae_loss(nn.Module):
     def __init__(self, anneal_function='logistic', k=0.0025, x0=2500):
         """Initialize Loss for VAE model."""
         super(vae_loss, self).__init__()
-        # self.loss_fn = nn.MSELoss()
-        self.loss_fn = nn.NLLLoss()
+        self.loss_fn = nn.MSELoss()
+        # self.loss_fn = nn.CrossEntropyLoss()
         self.anneal_function = anneal_function.lower()
         self.k = k
         self.x0 = x0
