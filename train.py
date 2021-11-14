@@ -12,7 +12,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 from dataset import CustomDataset
-from model import Transformer_encoder_VAE
+from model import vae_model#, Transformer_encoder_VAE
 from epoch import train_epoch, evaluate
 from utils import vae_loss
 
@@ -29,7 +29,7 @@ def main(args):
     file_path = os.path.join(os.getcwd(), args.dataset_path)
     total_data = pd.read_csv(file_path, sep='\t')
 
-    minmax_scaler = MinMaxScaler(feature_range=(-1, 1)) # 음수 값이 있으면 -1~1로 range 설정
+    minmax_scaler = MinMaxScaler(feature_range=(0, 1))
     minmax_scaler = minmax_scaler.fit(total_data)
     total_data_scaled = minmax_scaler.transform(total_data)
 
@@ -43,7 +43,7 @@ def main(args):
     train_loader = DataLoader(train_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     valid_loader = DataLoader(valid_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     
-    model = Transformer_encoder_VAE(args, dim_embed=args.dim_embed, n_feature=args.n_feature, 
+    model = vae_model(args, dim_embed=args.dim_embed, n_feature=args.n_feature, 
                                 n_past=args.n_past, latent_size=args.latent_size, n_future=args.n_future,
                                 num_layers=args.num_layers, dropout=args.dropout).to(device)
     
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_workers', default=2, type=int, 
                         help='dataloader num_workers for train')
 
-    parser.add_argument('--dim_embed', default=512, type=int, 
+    parser.add_argument('--dim_embed', default=128, type=int, 
                         help='transformer encoder embedding size for train')
     
     parser.add_argument('--num_layers', default=2, type=int, 
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_feature', default=5, type=int, 
                         help='n_feature size for train')
 
-    parser.add_argument('--latent_size', default=64, type=int, 
+    parser.add_argument('--latent_size', default=2, type=int, 
                         help='latent_size size for VAE')
 
     parser.add_argument('--dataset_path', type=str,

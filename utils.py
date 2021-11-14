@@ -6,8 +6,7 @@ class vae_loss(nn.Module):
     def __init__(self, anneal_function='logistic', k=0.0025, x0=2500):
         """Initialize Loss for VAE model."""
         super(vae_loss, self).__init__()
-        self.loss_fn = nn.MSELoss()
-        # self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn = nn.MSELoss() # regression (예측)으로, 예측값과 실제값의 차이 감소 시키기
         self.anneal_function = anneal_function.lower()
         self.k = k
         self.x0 = x0
@@ -31,7 +30,7 @@ class vae_loss(nn.Module):
 
     def forward(self, log_prob, target, mean, log_var, step):
         recon_loss = self.loss_fn(log_prob, target)
-        KL_loss = -0.5*torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+        KL_loss = torch.mean(-0.5*torch.sum(1 + log_var - mean.pow(2) - log_var.exp()))
         KL_weight = self.kl_anneal_function(step)
         
         total_loss = recon_loss + KL_loss*KL_weight
