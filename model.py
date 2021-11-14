@@ -55,14 +55,14 @@ class Transformer_encoder_VAE(nn.Module):
 
         z = self.reparameterize(mean, log_var) # z : [batch_size, n_past, latent_size]
 
-        out = self.decoder1(z).transpose(1, 2)
-        out = self.decoder2(out) 
+        # out = self.decoder1(z).transpose(1, 2)
+        # out = self.decoder2(out) 
         # out: [batch_size, n_future]
 
         # log_prob = F.log_softmax(out, dim=-1).squeeze() 
         # log_prob: [batch_size, n_future, n_future]
 
-        return out, mean, log_var#, log_prob #, z
+        return z, mean, log_var#, out, log_prob
 
 
     def reparameterize(self, mean, log_var):
@@ -91,3 +91,67 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return x + self.pe[:x.size(0), :]
+
+class generator_model(nn.Module):
+    def __init__(self, args, dim_embed, n_feature, n_past, latent_size, n_future, num_layers, dropout):
+        super(generator_model, self).__init__()
+
+        self.n_feature = n_feature
+        self.n_past = n_past
+        self.latent_size = latent_size
+        self.n_future = n_future
+        self.num_layers = num_layers
+        self.dim_embed = dim_embed
+        self.dropout = dropout
+        self.args = args
+        
+        self.embedding = nn.Linear(latent_size, dim_embed)
+        self.pos_encoder = PositionalEncoding(dim_embed)
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=dim_embed, nhead=2, dropout=dropout)
+        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
+
+        self.decoder_1 = nn.Linear(dim_embed, dim_embed//2)
+        self.decoder_2 = nn.Linear(dim_embed//2, n_future)
+
+        self.decoder1 = nn.Sequential(self.decoder_1, nn.ReLU(), self.decoder_2)
+        self.decoder2 = nn.Linear(n_past, n_future)
+
+    def forward(self, z):
+        mask = self.generate_square_subsequent_mask(len(z)).to(device)
+        src = self.embedding(z)*math.sqrt(self.dim_embed)
+        src = self.pos_encoder(src)
+
+        out = self.encoder_layer(src)
+        out = self.transformer_encoder(out, mask)
+
+        out = self.decoder1(out).transpose(1, 2)
+        out = self.decoder2(out) 
+        # out: [batch_size, n_future]
+
+        # log_prob = F.log_softmax(out, dim=-1).squeeze() 
+        # log_prob: [batch_size, n_future, n_future]
+
+        return out
+
+    def generate_square_subsequent_mask(self, sz):
+        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        return mask
+
+class vae_model(nn.Module):
+    def __init__(self, args, dim_embed, n_feature, n_past, latent_size, n_future, num_layers, dropout):
+        super(vae_model, self).__init__()
+        self.encode = Transformer_encoder_VAE(args, dim_embed, n_feature, n_past, latent_size, n_future, num_layers, dropout)
+        self.decode = generator_model(args, dim_embed, n_feature, n_past, latent_size, n_future, num_layers, dropout)
+
+    def forward(self, x):
+        z, mean, log_var = self.encode(x)
+        # z_ = torch.randn(z.size(0), z.size(1), z.size(3)).to(device)
+        out = self.decode(z)
+
+        return out, mean, log_var
+
+# class discriminator_model(nn.Module):
+#     def __init__(self):
+#         super(self, discriminator_model).__init__()
+
