@@ -21,6 +21,10 @@
 
     - Encoder를 통해서 z에 mapping을 시키는 역할 기대, 그리고 Generator 도입하여 z를 input으로 하여서 output으로 예측값을 생성
 
+## 1-4. Model (Transformer, GRU 적용)
+
+    - trend 및 예측값 부분에서 transformer와 GRU model을 적용
+
 
 ## 2. 결과
     
@@ -48,6 +52,13 @@
 
     - 결과는 [그림 2.3] 참고
 
+### 2.4 Transformer와 GRU model 적용
+
+    - Transformer 에서는 성능 및 trend를 잘 쫓아가는 결과를 보임
+
+    - GRU model에서는 동일한 epoch으로 비교시, 성능이 더 떨어짐을 확인
+
+    - 결과는 [그림 2.4] 참고
 
 ### [그림 2.1] Transformer Encoder 적용
 ![figure_epoch201_past30_batch200.png](./figure_save/figure_epoch201_past30_batch200.png)
@@ -59,6 +70,11 @@
 
 ![VAE_figure_epoch50_past30_batch200_generator.png](./figure_save/VAE_figure_epoch50_past30_batch200_generator.png)
 
+### [그림 2.4] Transformer & GRU model 적용
+![Transformer_figure_epoch50_past30_batch200.png](./figure_save/Transformer_figure_epoch50_past30_batch200.png)
+
+![GRU_model_figure_epoch50_past30_batch200.png](./figure_save/GRU_model_figure_epoch50_past30_batch200.png)
+
 ## 3. More..
 
     - VAE를 통해서 나온 샘플들이 극단값을 잘 잡아내는지 확인
@@ -68,7 +84,3 @@
     - MSE Loss만 적용 시에는 극단값을 조금 더 잘 잡아내는 수준
 
     - 논문의 idea 적용을 위해서는 normal data의 분류 (기준 정의 필요) 또는 수집이 필요한 것으로 보임
-
-
-
-
