@@ -3,7 +3,7 @@ from tqdm.auto import tqdm
 
 # step = 0
 
-def train_epoch(model, data_loader, criterion, optimizer, device):
+def train_epoch(args, model, data_loader, criterion, optimizer, device, model_state):
     # global step
 
     model.train()
@@ -19,7 +19,10 @@ def train_epoch(model, data_loader, criterion, optimizer, device):
 
         # output, mean, log_var = model(X)
         # loss = criterion(output, y, mean, log_var, step)
-        output = model(X, y)
+        if args.model_state == 'GRU_model':
+            output = model(X)
+        else:
+            output = model(X, y)
         loss = criterion(output, y)
         loss_value = loss.item()
         train_loss += loss_value
@@ -32,12 +35,12 @@ def train_epoch(model, data_loader, criterion, optimizer, device):
         loss.backward()
         optimizer.step()
 
-        step += 1
+        # step += 1
 
     return train_loss/total
 
 
-def evaluate(model, data_loader, criterion, device):
+def evaluate(args, model, data_loader, criterion, device, model_state):
     # global step
 
     y_list = []
@@ -56,7 +59,10 @@ def evaluate(model, data_loader, criterion, device):
 
             # output, mean, log_var = model(X)
             # loss = criterion(output, y, mean, log_var, step)
-            output = model(X)
+            if args.model_state == 'GRU_model':
+                output = model(X)
+            else:
+                output = model(X, y)
             loss = criterion(output, y)
             loss_value = loss.item()
             valid_loss += loss_value
