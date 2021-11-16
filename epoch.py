@@ -16,7 +16,7 @@ def train_epoch(model, data_loader, criterion, optimizer, device):
         X = X.float().to(device)
         y = y.float().to(device) # y : [batch_size, n_fuutre]
         # y = y.squeeze() # y : [batch_size]
-        y = y.unsqueeze(1)
+        # y = y.unsqueeze(1)
 
         # output, mean, log_var = model(X)
         # loss = criterion(output, y, mean, log_var, step)
@@ -54,7 +54,7 @@ def evaluate(model, data_loader, criterion, device):
             X = X.float().to(device)
             y = y.float().to(device)
             # y = y.squeeze() # y : [batch_size]
-            y = y.unsqueeze(1)
+            # y = y.unsqueeze(1)
 
             # output, mean, log_var = model(X)
             # loss = criterion(output, y, mean, log_var, step)

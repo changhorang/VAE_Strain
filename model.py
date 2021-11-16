@@ -81,10 +81,11 @@ class Transformer_encoder_VAE(nn.Module):
 
 
 class Transformer_model(nn.Module):
-    def __init__(self, args, dim_embed, nhead, n_feature, num_encoder_layers, num_decoder_layers, num_layers, dropout):
+    def __init__(self, args, dim_embed, nhead, n_feature, n_future, num_encoder_layers, num_decoder_layers, num_layers, dropout):
         super(Transformer_model, self).__init__()
 
         self.n_feature = n_feature
+        self.n_future = n_future
         self.num_layers = num_layers
         self.dim_embed = dim_embed
         self.nhead = nhead
@@ -93,7 +94,7 @@ class Transformer_model(nn.Module):
 
         self.dropout = dropout
         self.args = args
-
+        self.linear = nn.Linear(n_feature, n_future)
         self.embedding = nn.Linear(n_feature, dim_embed)
         self.pos_encoder = PositionalEncoding(dim_embed)
         self.encoder = nn.Embedding(n_feature , dim_embed)
@@ -104,6 +105,9 @@ class Transformer_model(nn.Module):
 
     def forward(self, X, y, tgt_mask=None, src_pad_mask=None, tgt_pad_mask=None):
         src = self.encoder(X)*math.sqrt(self.dim_embed)
+        X = self.linear(X) # [batch_size, 30, 1]
+        y = y.unsqueeze(1)
+        y = y.unsqueeze(1) # [batch_size, 1, 1]
         tgt = self.encoder(y)*math.sqrt(self.dim_embed)
         src = self.pos_encoder(src)
         tgt = self.pos_encoder(tgt)
