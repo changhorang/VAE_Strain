@@ -8,7 +8,7 @@ class CustomDataset(Dataset):
                 
         for i in range(args.n_past, len(df)):
             self.X.append(df[i-args.n_past:i, 1:-1])
-            self.y.append(df[i-1:i, -1])
+            self.y.append(df[i-1+n_future:i+n_future, -1])
 
     def __len__(self):
         return len(self.X)

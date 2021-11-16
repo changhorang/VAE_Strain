@@ -81,51 +81,36 @@ class Transformer_encoder_VAE(nn.Module):
 
 
 class Transformer_model(nn.Module):
-    def __init__(self, args, dim_embed, nhead, n_feature, n_future, num_encoder_layers, num_decoder_layers, num_layers, dropout):
+    def __init__(self, args, batch_size, dim_embed, nhead, n_feature, n_future, num_layers, dropout):
         super(Transformer_model, self).__init__()
 
+        self.batch_size = batch_size
         self.n_feature = n_feature
         self.n_future = n_future
         self.num_layers = num_layers
         self.dim_embed = dim_embed
         self.nhead = nhead
-        self.num_encoder_layers = num_encoder_layers
-        self.num_decoder_layers = num_decoder_layers
 
         self.dropout = dropout
         self.args = args
-        self.linear = nn.Linear(n_feature, n_future)
-        self.embedding = nn.Linear(n_feature, dim_embed)
-        self.pos_encoder = PositionalEncoding(dim_embed)
-        self.encoder = nn.Embedding(n_feature , dim_embed)
-        self.transformer = nn.Transformer(d_model=dim_embed, nhead=nhead,
-                                        num_encoder_layers=num_encoder_layers,
-                                        num_decoder_layers=num_decoder_layers)
-        self.decoder = nn.Linear(dim_embed, n_feature)
+        
+        self.embedding1 = nn.Linear(n_feature, dim_embed)
+        self.embedding2 = nn.Linear(n_future, dim_embed)
 
-    def forward(self, X, y, tgt_mask=None, src_pad_mask=None, tgt_pad_mask=None):
-        src = self.encoder(X)*math.sqrt(self.dim_embed)
-        X = self.linear(X) # [batch_size, 30, 1]
-        y = y.unsqueeze(1)
-        y = y.unsqueeze(1) # [batch_size, 1, 1]
-        tgt = self.encoder(y)*math.sqrt(self.dim_embed)
-        src = self.pos_encoder(src)
-        tgt = self.pos_encoder(tgt)
+        self.transformer = nn.Transformer(batch_first=True)
+        self.decoder = nn.Linear(dim_embed, n_future)
 
-        output = self.transformer(src, tgt, tgt_mask=tgt_mask, src_key_padding_mask=src_pad_mask, tgt_key_padding_mask=tgt_pad_mask)
+    def forward(self, X, y):
+        src_embed = self.embedding1(X)
+        tgt_embed = self.embedding2(y)
+        print(src_embed.shape, tgt_embed.shape)
+        output = self.transformer(src_embed, tgt_embed)
+        # [batch_size, n_future, dim_embed]
+
         output = self.decoder(output)
+        # [batch_size, n_future, n_future]
 
         return output
-
-    def generate_square_subsequent_mask(self, size):
-        mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
-        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-        return mask
-    
-    def create_pad_mask(self, matrix: torch.tensor, pad_token: int) -> torch.tensor:
-        # If matrix = [1,2,3,0,0,0] where pad_token=0, the result mask is
-        # [False, False, False, True, True, True]
-        return (matrix == pad_token)
 
 
 class PositionalEncoding(nn.Module):

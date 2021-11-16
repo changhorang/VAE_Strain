@@ -15,12 +15,11 @@ def train_epoch(model, data_loader, criterion, optimizer, device):
     for _, (X, y) in enumerate(tqdm(data_loader)):
         X = X.float().to(device)
         y = y.float().to(device) # y : [batch_size, n_fuutre]
-        # y = y.squeeze() # y : [batch_size]
-        # y = y.unsqueeze(1)
+        y = y.unsqueeze(1)
 
         # output, mean, log_var = model(X)
         # loss = criterion(output, y, mean, log_var, step)
-        output = model(X)
+        output = model(X, y)
         loss = criterion(output, y)
         loss_value = loss.item()
         train_loss += loss_value
@@ -53,8 +52,7 @@ def evaluate(model, data_loader, criterion, device):
         for _, (X, y) in enumerate(tqdm(data_loader)):
             X = X.float().to(device)
             y = y.float().to(device)
-            # y = y.squeeze() # y : [batch_size]
-            # y = y.unsqueeze(1)
+            y = y.unsqueeze(1)
 
             # output, mean, log_var = model(X)
             # loss = criterion(output, y, mean, log_var, step)
