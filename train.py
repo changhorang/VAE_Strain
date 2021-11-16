@@ -12,7 +12,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 from dataset import CustomDataset
-from model import Transformer_model
+from model import Transformer_model, Transformer_encoder, GRU_model
 from epoch import train_epoch, evaluate
 from utils import vae_loss
 
@@ -43,10 +43,19 @@ def main(args):
     train_loader = DataLoader(train_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     valid_loader = DataLoader(valid_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     
-    model = Transformer_model(args, batch_size=args.batch_size, dim_embed=args.dim_embed, nhead=args.nhead, n_feature=args.n_feature, 
-                                n_future=args.n_future,
+    if args.model_state == 'Transformer':
+        model = Transformer_model(args, batch_size=args.batch_size, dim_embed=args.dim_embed, nhead=args.nhead, n_feature=args.n_feature, 
+                                n_future=args.n_future, num_layers=args.num_layers, dropout=args.dropout).to(device)
+    
+    elif args.model_state == 'Transformer_encoder':
+        model = Transformer_encoder(args, dim_embed=args.dim_embed, n_feature=args.n_feature, 
+                                n_past=args.n_past, n_future=args.n_future,
                                 num_layers=args.num_layers, dropout=args.dropout).to(device)
     
+    elif args.model_state == 'GRU_model':
+        model = GRU_model(args, n_feature=args.n_feature, n_past=args.n_past, n_future=args.n_future,
+                        num_layers=args.num_layers, dim_model=512, dim_embed=args.dim_embed, dropout=args.dropout).to(device)
+
     # criterion = vae_loss()
     criterion = nn.MSELoss()
 
@@ -77,12 +86,16 @@ def main(args):
     data_path = os.path.join(os.getcwd(), "figure_save")
     if not os.path.exists(data_path):
         os.mkdir(data_path)
-    plt.savefig(f"{data_path}/VAE_figure_epoch{int(args.epochs)}_past{args.n_past}_batch{args.batch_size}.png")
+    plt.savefig(f"{data_path}/{args.model_state}_figure_epoch{int(args.epochs)}_past{args.n_past}_batch{args.batch_size}.png")
     
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+
+    parser.add_argument('--model_state', type=str,
+                        default='Transformer',
+                        help='model change')
 
     parser.add_argument('--num_workers', default=2, type=int, 
                         help='dataloader num_workers for train')
