@@ -15,7 +15,7 @@ class Transformer_encoder_VAE(nn.Module):
 
         self.n_feature = n_feature
         self.n_past = n_past
-        self.latent_size = latent_size
+        # self.latent_size = latent_size
         self.n_future = n_future
         self.num_layers = num_layers
         self.dim_embed = dim_embed
@@ -78,6 +78,39 @@ class Transformer_encoder_VAE(nn.Module):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
+
+
+class Transformer_model(nn.Module):
+    def __init__(self, args, batch_size, dim_embed, nhead, n_feature, n_future, num_layers, dropout):
+        super(Transformer_model, self).__init__()
+
+        self.batch_size = batch_size
+        self.n_feature = n_feature
+        self.n_future = n_future
+        self.num_layers = num_layers
+        self.dim_embed = dim_embed
+        self.nhead = nhead
+
+        self.dropout = dropout
+        self.args = args
+        
+        self.embedding1 = nn.Linear(n_feature, dim_embed)
+        self.embedding2 = nn.Linear(n_future, dim_embed)
+
+        self.transformer = nn.Transformer(batch_first=True)
+        self.decoder = nn.Linear(dim_embed, n_future)
+
+    def forward(self, X, y):
+        src_embed = self.embedding1(X)
+        tgt_embed = self.embedding2(y)
+        print(src_embed.shape, tgt_embed.shape)
+        output = self.transformer(src_embed, tgt_embed)
+        # [batch_size, n_future, dim_embed]
+
+        output = self.decoder(output)
+        # [batch_size, n_future, n_future]
+
+        return output
 
 
 class PositionalEncoding(nn.Module):

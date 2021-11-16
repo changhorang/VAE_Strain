@@ -12,7 +12,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 from dataset import CustomDataset
-from model import vae_model#, Transformer_encoder_VAE
+from model import Transformer_model
 from epoch import train_epoch, evaluate
 from utils import vae_loss
 
@@ -43,8 +43,8 @@ def main(args):
     train_loader = DataLoader(train_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     valid_loader = DataLoader(valid_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     
-    model = vae_model(args, dim_embed=args.dim_embed, n_feature=args.n_feature, 
-                                n_past=args.n_past, latent_size=args.latent_size, n_future=args.n_future,
+    model = Transformer_model(args, batch_size=args.batch_size, dim_embed=args.dim_embed, nhead=args.nhead, n_feature=args.n_feature, 
+                                n_future=args.n_future,
                                 num_layers=args.num_layers, dropout=args.dropout).to(device)
     
     # criterion = vae_loss()
@@ -87,8 +87,11 @@ if __name__ == "__main__":
     parser.add_argument('--num_workers', default=2, type=int, 
                         help='dataloader num_workers for train')
 
-    parser.add_argument('--dim_embed', default=128, type=int, 
+    parser.add_argument('--dim_embed', default=512, type=int, 
                         help='transformer encoder embedding size for train')
+    
+    parser.add_argument('--nhead', default=8, type=int, 
+                        help='transformer nhead')
     
     parser.add_argument('--num_layers', default=2, type=int, 
                         help='transformer encoder num_layers size for train')
