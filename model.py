@@ -128,12 +128,12 @@ class PositionalEncoding(nn.Module):
         return x + self.pe[:x.size(0), :]
 
 class GRU_model(nn.Module):
-    def __init__(self, args, n_feature, n_past, n_future, n_layers, dim_model, dim_embed, dropout):
+    def __init__(self, args, n_feature, n_past, n_future, num_layers, dim_model, dim_embed, dropout):
         super(GRU_model, self).__init__()
         self.n_feature = n_feature
         self.n_past = n_past
         self.n_future = n_future
-        self.n_layers = n_layers
+        self.num_layers = num_layers
         self.dim_model = dim_model
         self.dim_embed = dim_embed
         self.dropout = dropout
