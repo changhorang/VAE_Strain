@@ -66,11 +66,11 @@ def main(args):
     print("Start Training..")
     for epoch in range(1, args.epochs+1):
         print(f"Epoch : {epoch}/{args.epochs}")
-        epoch_loss = train_epoch(model, train_loader, criterion, optimizer, device)
+        epoch_loss = train_epoch(args, model, train_loader, criterion, optimizer, device, args.model_state)
         print(f"Training Loss: {epoch_loss:.5f}")
     
 
-    valid_loss, y_list, output_list = evaluate(model, valid_loader, criterion, device)
+    valid_loss, y_list, output_list = evaluate(args, model, valid_loader, criterion, device, args.model_state)
     rmse = np.sqrt(valid_loss)
     print(f"Validation Loss: {valid_loss:.5f}")
     print(f'RMSE is {rmse:.5f}')
@@ -93,8 +93,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--model_state', type=str,
-                        default='Transformer',
+    parser.add_argument('--model_state', type=str, default='Transformer',
                         help='model change')
 
     parser.add_argument('--num_workers', default=2, type=int, 
