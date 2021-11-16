@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 torch.manual_seed(1)
 
-class Transformer_encoder_VAE(nn.Module):
+class Transformer_encoder(nn.Module):
     def __init__(self, args, dim_embed, n_feature, n_past, n_future, num_layers, dropout):
         super(Transformer_encoder_VAE, self).__init__()
 
@@ -97,13 +97,13 @@ class Transformer_model(nn.Module):
         self.embedding1 = nn.Linear(n_feature, dim_embed)
         self.embedding2 = nn.Linear(n_future, dim_embed)
 
-        self.transformer = nn.Transformer(batch_first=True)
+        self.transformer = nn.Transformer(d_model=dim_embed, nhead=nhead, batch_first=True)
         self.decoder = nn.Linear(dim_embed, n_future)
 
     def forward(self, X, y):
         src_embed = self.embedding1(X)
         tgt_embed = self.embedding2(y)
-        print(src_embed.shape, tgt_embed.shape)
+        
         output = self.transformer(src_embed, tgt_embed)
         # [batch_size, n_future, dim_embed]
 
@@ -126,6 +126,32 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return x + self.pe[:x.size(0), :]
+
+class GRU_model(nn.Module):
+    def __init__(self, args, n_feature, n_past, n_future, n_layers, dim_model, dim_embed, dropout):
+        super(GRU_model, self).__init__()
+        self.n_feature = n_feature
+        self.n_past = n_past
+        self.n_future = n_future
+        self.n_layers = n_layers
+        self.dim_model = dim_model
+        self.dim_embed = dim_embed
+        self.dropout = dropout
+
+        self.embedding = nn.Linear(n_feature, dim_embed)    # n_feature -> dim_model 사이즈로 embedding
+        self.fc = nn.Linear(dim_model, n_future)    # dim_model -> n_future 사이즈
+        self.gru = nn.GRU(input_size=dim_embed, hidden_size=dim_model, dropout=dropout)
+        # self.relu = nn.ReLU()
+
+    def forward(self, x):
+        # hidden state/cell state 초기화
+        h = torch.zeros(1, self.n_past, self.dim_model).to(device)
+        c = torch.zeros(1, self.n_past, self.dim_model).to(device)
+
+        # out, (h, c) = self.GRU(self.embedding(x),)
+        out, (h, c) = self.gru(self.embedding(x), (h, c))
+        out = self.fc(out[:, -1, :])
+        return out
 
 # class generator_model(nn.Module):
 #     def __init__(self, args, dim_embed, n_feature, n_past, latent_size, n_future, num_layers, dropout):
