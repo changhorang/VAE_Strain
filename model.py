@@ -146,10 +146,10 @@ class GRU_model(nn.Module):
     def forward(self, x):
         # hidden state/cell state 초기화
         h = torch.zeros(1, self.n_past, self.dim_model).to(device)
-        c = torch.zeros(1, self.n_past, self.dim_model).to(device)
+        # c = torch.zeros(1, self.n_past, self.dim_model).to(device)
 
-        # out, (h, c) = self.GRU(self.embedding(x),)
-        out, (h, c) = self.gru(self.embedding(x), (h, c))
+        # out, h = self.gru(self.embedding(x),)
+        out, h = self.gru(self.embedding(x), h)
         out = self.fc(out[:, -1, :])
         return out
 

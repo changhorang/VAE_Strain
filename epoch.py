@@ -15,7 +15,8 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device, model_st
     for _, (X, y) in enumerate(tqdm(data_loader)):
         X = X.float().to(device)
         y = y.float().to(device) # y : [batch_size, n_fuutre]
-        y = y.unsqueeze(1)
+        if model_state != 'GRU_model':
+            y = y.unsqueeze(1)
 
         # output, mean, log_var = model(X)
         # loss = criterion(output, y, mean, log_var, step)
@@ -55,7 +56,8 @@ def evaluate(args, model, data_loader, criterion, device, model_state):
         for _, (X, y) in enumerate(tqdm(data_loader)):
             X = X.float().to(device)
             y = y.float().to(device)
-            y = y.unsqueeze(1)
+            if model_state != 'GRU_model':
+                y = y.unsqueeze(1)
 
             # output, mean, log_var = model(X)
             # loss = criterion(output, y, mean, log_var, step)
