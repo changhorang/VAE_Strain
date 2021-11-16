@@ -15,7 +15,7 @@ class Transformer_encoder_VAE(nn.Module):
 
         self.n_feature = n_feature
         self.n_past = n_past
-        self.latent_size = latent_size
+        # self.latent_size = latent_size
         self.n_future = n_future
         self.num_layers = num_layers
         self.dim_embed = dim_embed
@@ -78,6 +78,50 @@ class Transformer_encoder_VAE(nn.Module):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
+
+
+class Transformer_model(nn.Module):
+    def __init__(self, args, dim_embed, nhead, n_feature, num_encoder_layers, num_decoder_layers, num_layers, dropout):
+        super(Transformer_model, self).__init__()
+
+        self.n_feature = n_feature
+        self.num_layers = num_layers
+        self.dim_embed = dim_embed
+        self.nhead = nhead
+        self.num_encoder_layers = num_encoder_layers
+        self.num_decoder_layers = num_decoder_layers
+
+        self.dropout = dropout
+        self.args = args
+
+        self.embedding = nn.Linear(n_feature, dim_embed)
+        self.pos_encoder = PositionalEncoding(dim_embed)
+        self.encoder = nn.Embedding(n_feature , dim_embed)
+        self.transformer = nn.Transformer(d_model=dim_embed, nhead=nhead,
+                                        num_encoder_layers=num_encoder_layers,
+                                        num_decoder_layers=num_decoder_layers)
+        self.decoder = nn.Linear(dim_embed, n_feature)
+
+    def forward(self, X, y, tgt_mask=None, src_pad_mask=None, tgt_pad_mask=None):
+        src = self.encoder(X)*math.sqrt(self.dim_embed)
+        tgt = self.encoder(y)*math.sqrt(self.dim_embed)
+        src = self.pos_encoder(src)
+        tgt = self.pos_encoder(tgt)
+
+        output = self.transformer(src, tgt, tgt_mask=tgt_mask, src_key_padding_mask=src_pad_mask, tgt_key_padding_mask=tgt_pad_mask)
+        output = self.decoder(output)
+
+        return output
+
+    def generate_square_subsequent_mask(self, size):
+        mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        return mask
+    
+    def create_pad_mask(self, matrix: torch.tensor, pad_token: int) -> torch.tensor:
+        # If matrix = [1,2,3,0,0,0] where pad_token=0, the result mask is
+        # [False, False, False, True, True, True]
+        return (matrix == pad_token)
 
 
 class PositionalEncoding(nn.Module):
