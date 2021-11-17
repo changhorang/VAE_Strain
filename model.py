@@ -11,7 +11,7 @@ torch.manual_seed(1)
 
 class Transformer_encoder(nn.Module):
     def __init__(self, args, dim_embed, n_feature, n_past, n_future, num_layers, dropout):
-        super(Transformer_encoder_VAE, self).__init__()
+        super(Transformer_encoder, self).__init__()
 
         self.n_feature = n_feature
         self.n_past = n_past
