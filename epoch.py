@@ -20,10 +20,10 @@ def train_epoch(args, model, data_loader, criterion, optimizer, device, model_st
 
         # output, mean, log_var = model(X)
         # loss = criterion(output, y, mean, log_var, step)
-        if args.model_state != 'Transformer_model':
-            output = model(X)
-        else:
+        if args.model_state == 'Transformer_model':
             output = model(X, y)
+        else:
+            output = model(X)
         loss = criterion(output, y)
         loss_value = loss.item()
         train_loss += loss_value
@@ -61,10 +61,10 @@ def evaluate(args, model, data_loader, criterion, device, model_state):
 
             # output, mean, log_var = model(X)
             # loss = criterion(output, y, mean, log_var, step)
-            if args.model_state != 'Transformer_model':
-                output = model(X)
-            else:
+            if args.model_state == 'Transformer_model':
                 output = model(X, y)
+            else:
+                output = model(X)
             loss = criterion(output, y)
             loss_value = loss.item()
             valid_loss += loss_value

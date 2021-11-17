@@ -43,7 +43,7 @@ def main(args):
     train_loader = DataLoader(train_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     valid_loader = DataLoader(valid_data, batch_size=args.batch_size, drop_last=True, num_workers=args.num_workers)
     
-    if args.model_state == 'Transformer':
+    if args.model_state == 'Transformer_model':
         model = Transformer_model(args, batch_size=args.batch_size, dim_embed=args.dim_embed, nhead=args.nhead, n_feature=args.n_feature, 
                                 n_future=args.n_future, num_layers=args.num_layers, dropout=args.dropout).to(device)
     
@@ -93,7 +93,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--model_state', type=str, default='Transformer',
+    parser.add_argument('--model_state', type=str, default='Transformer_model',
                         help='model change')
 
     parser.add_argument('--num_workers', default=2, type=int, 
