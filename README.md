@@ -3,7 +3,7 @@
 ## 1-1. Model 변경 (Transfomer Encoder)
 
 - 기존의 LSTM을 활용해 time series forcasting을 Transformer Encoder으로 예측
-    
+
 - 기대 효과는 Transformer에 있는 self-attention의 장점을 이용해 예측의 향상
 
 
@@ -76,10 +76,10 @@
 ![VAE_figure_epoch50_past30_batch200_generator.png](./figure_save/VAE_figure_epoch50_past30_batch200_generator.png)
 
 ### [그림 2.4] Transformer model
-![Transformer_figure_epoch100_past30_batch200.png](./figure_save/Transformer_figure_epoch50_past30_batch200.png)
+![Transformer_model_figure_epoch100_past30_batch200.png](./figure_save/Transformer_model_figure_epoch100_past30_batch200.png)
 
 ### [그림 2.5] GRU model 적용
-![GRU_model_figure_epoch100_past30_batch200.png](./figure_save/GRU_model_figure_epoch50_past30_batch200.png)
+![GRU_model_figure_epoch100_past30_batch200.png](./figure_save/GRU_model_figure_epoch100_past30_batch200.png)
 
 ## 3. More..
 
@@ -88,3 +88,35 @@
 - Pre-trained 된 모델을 활용해 anomaly-detection을 적용 할 예정
 
 - 없을 경우, ARIMA등을 활용해 추세선에 비해 높은 값에 대해서 detection하는 방법등을 활용해볼 예정
+
+## 4. train model
+
+    !python3 train.py
+
+### Arguments
+
+    --model_state : model change (Transformer_model, Transformer_encoder, GRU_model)
+
+    --num_workers : dataloader num_workers for train
+
+    --dim_embed : embedding size for train
+    
+    --nhead : transformer nhead
+    
+    --num_layers : transformer (encoder) num_layers size for train
+
+    --dropout : transformer encoder dropout ratio for train
+
+    --epochs : epochs for train
+
+    --lr : optimizer learning rate for train
+
+    --batch_size : batch size for train
+
+    --n_past : n_past size for train
+
+    --n_future : n_future size for train
+
+    --n_feature : n_feature size for train
+
+    --dataset_path : Path of dataset
