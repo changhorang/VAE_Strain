@@ -73,9 +73,9 @@ def main(args):
 
     valid_loss, y_list, output_list = evaluate(args, model, valid_loader, criterion, device, args.model_state)
 
-    with open('y_list.csv', 'w') as file:
+    with open('y_list.csv', 'w', newline='') as file:
         write = csv.writer(file)
-        write = writerow(y_list)
+        write.writerow(y_list)
 
     rmse = np.sqrt(valid_loss)
     print(f"Validation Loss: {valid_loss:.5f}")
