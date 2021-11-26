@@ -77,6 +77,10 @@ def main(args):
         write = csv.writer(file)
         write.writerow(y_list)
 
+    with open('output_list.csv', 'w', newline='') as file:
+        write = csv.writer(file)
+        write.writerow(output_list)
+
     rmse = np.sqrt(valid_loss)
     print(f"Validation Loss: {valid_loss:.5f}")
     print(f'RMSE is {rmse:.5f}')
